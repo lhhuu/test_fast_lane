@@ -127,16 +127,31 @@ puts lane_context[SharedValues::GRADLE_BUILD_TYPE]
     # ...
     puts "after_all"
     commit = last_git_commit
-    pilot(changelog: commit[:message]) # message of commit
+#     pilot(changelog: commit[:message]) # message of commit
     author = commit[:author] # author of the commit
     author_email = commit[:author_email] # email of the author of the commit
     hash = commit[:commit_hash] # long sha of commit
     short_hash = commit[:abbreviated_commit_hash] # short sha of commit
+    message = commit[:message] # short sha of commit
 
     UI.message author
     UI.message author_email
     UI.message hash
     UI.message short_hash
+    UI.message message
+
+    lastTagHash = sh("git rev-list --tags --max-count\=1")
+    changelog = changelog_from_git_commits(
+      between: [lastTagHash, "HEAD"],  # Optional, lets you specify a revision/tag range between which to collect commit info
+      pretty: "- (%ae) %s",# Optional, lets you provide a custom format to apply to each commit when generating the changelog text
+      date_format: "short",# Optional, lets you provide an additional date format to dates within the pretty-formatted string
+      match_lightweight_tag: false,  # Optional, lets you ignore lightweight (non-annotated) tags when searching for the last tag
+      merge_commit_filtering: "include_merges" # Optional, lets you filter out merge commits
+    )
+
+#     puts "day la changelog #{changelog}"
+#     puts "day la  tag #{last_git_tag()}"
+#     puts "day la  tag has #{lastTagHash}"
   end
 
   after_each do |lane, options|
